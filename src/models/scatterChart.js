@@ -154,7 +154,9 @@ nv.models.scatterChart = function() {
 
       //------------------------------------------------------------
       // Setup Scales
-
+      x = scatter.xScale();
+      y = scatter.yScale();
+      
       x0 = x0 || x;
       y0 = y0 || y;
 
