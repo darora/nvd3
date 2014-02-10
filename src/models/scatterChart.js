@@ -29,6 +29,7 @@ nv.models.scatterChart = function() {
     , rightAlignYAxis    = false
     , showControls       = !!d3.fisheye
     , fisheye            = 0
+    , fisheyeEnabled     = false
     , pauseFisheye       = false
     , tooltips           = true
     , tooltipX           = function(key, x, y) { return '<strong>' + x + '</strong>' }
@@ -156,7 +157,7 @@ nv.models.scatterChart = function() {
       // Setup Scales
       x = scatter.xScale();
       y = scatter.yScale();
-      
+
       x0 = x0 || x;
       y0 = y0 || y;
 
@@ -322,7 +323,7 @@ nv.models.scatterChart = function() {
         gEnter.select('.nv-distWrap').append('g')
             .attr('class', 'nv-distributionY');
         g.select('.nv-distributionY')
-            .attr('transform', 
+            .attr('transform',
               'translate(' + (rightAlignYAxis ? availableWidth : -distY.size() ) + ',0)')
             .datum(data.filter(function(d) { return !d.disabled }))
             .call(distY);
@@ -350,31 +351,31 @@ nv.models.scatterChart = function() {
         if (pauseFisheye) {
           g.select('.nv-point-paths').style('pointer-events', 'all');
           return false;
-        }
+        } else if (fisheyeEnabled) {
 
-        g.select('.nv-point-paths').style('pointer-events', 'none' );
+          g.select('.nv-point-paths').style('pointer-events', 'none' );
 
-        var mouse = d3.mouse(this);
-        x.distortion(fisheye).focus(mouse[0]);
-        y.distortion(fisheye).focus(mouse[1]);
+          var mouse = d3.mouse(this);
+          x.distortion(fisheye).focus(mouse[0]);
+          y.distortion(fisheye).focus(mouse[1]);
 
-        g.select('.nv-scatterWrap')
+          g.select('.nv-scatterWrap')
             .call(scatter);
 
-        if (showXAxis)
-          g.select('.nv-x.nv-axis').call(xAxis);
-        
-        if (showYAxis)
-          g.select('.nv-y.nv-axis').call(yAxis);
-        
-        g.select('.nv-distributionX')
+          if (showXAxis)
+            g.select('.nv-x.nv-axis').call(xAxis);
+
+          if (showYAxis)
+            g.select('.nv-y.nv-axis').call(yAxis);
+
+          g.select('.nv-distributionX')
             .datum(data.filter(function(d) { return !d.disabled }))
             .call(distX);
-        g.select('.nv-distributionY')
+          g.select('.nv-distributionY')
             .datum(data.filter(function(d) { return !d.disabled }))
             .call(distY);
+        }
       }
-
 
 
       //============================================================
@@ -389,6 +390,7 @@ nv.models.scatterChart = function() {
         g.select('.nv-point-paths').style('pointer-events', d.disabled ? 'all' : 'none' );
 
         if (d.disabled) {
+          fisheyeEnabled = false;
           x.distortion(fisheye).focus(0);
           y.distortion(fisheye).focus(0);
 
@@ -397,6 +399,7 @@ nv.models.scatterChart = function() {
           g.select('.nv-y.nv-axis').call(yAxis);
         } else {
           pauseFisheye = false;
+          fisheyeEnabled = true;
         }
 
         chart.update();
@@ -485,7 +488,7 @@ nv.models.scatterChart = function() {
 
   d3.rebind(chart, scatter, 'id', 'interactive', 'pointActive', 'x', 'y', 'shape', 'size', 'xScale', 'yScale', 'zScale', 'xDomain', 'yDomain', 'xRange', 'yRange', 'sizeDomain', 'sizeRange', 'forceX', 'forceY', 'forceSize', 'clipVoronoi', 'clipRadius', 'useVoronoi');
   chart.options = nv.utils.optionsFunc.bind(chart);
-  
+
   chart.margin = function(_) {
     if (!arguments.length) return margin;
     margin.top    = typeof _.top    != 'undefined' ? _.top    : margin.top;
@@ -619,7 +622,7 @@ nv.models.scatterChart = function() {
     defaultState = _;
     return chart;
   };
-  
+
   chart.noData = function(_) {
     if (!arguments.length) return noData;
     noData = _;
